@@ -157,7 +157,7 @@ def _get_vespa_chunk_ids_by_document_id(
         "hits": hits_per_page,
     }
     while True:
-        results = requests.post(SEARCH_ENDPOINT, json=params).json()
+        results = requests.post(SEARCH_ENDPOINT, json=params, proxies={'http':'', 'https':''}).json()
         hits = results["root"].get("children", [])
 
         doc_chunk_ids.extend(
@@ -350,7 +350,7 @@ def _clear_and_index_vespa_chunks(
     # indexing / updates / deletes since we have to make a large volume of requests.
     with (
         concurrent.futures.ThreadPoolExecutor(max_workers=_NUM_THREADS) as executor,
-        httpx.Client(http2=True) as http_client,
+        httpx.Client(http2=True, proxies={}) as http_client,
     ):
         # Check for existing documents, existing documents need to have all of their chunks deleted
         # prior to indexing as the document size (num chunks) may have shrunk
@@ -568,7 +568,7 @@ def _query_vespa(query_params: Mapping[str, str | int | float]) -> list[Inferenc
             }
             if LOG_VESPA_TIMING_INFORMATION
             else {},
-        ),
+        ), proxies={'http':'', 'https':''},
     )
     response.raise_for_status()
 
@@ -596,7 +596,7 @@ def _query_vespa(query_params: Mapping[str, str | int | float]) -> list[Inferenc
 @retry(tries=3, delay=1, backoff=2)
 def _inference_chunk_by_vespa_id(vespa_id: str, index_name: str) -> InferenceChunk:
     res = requests.get(
-        f"{DOCUMENT_ID_ENDPOINT.format(index_name=index_name)}/{vespa_id}"
+        f"{DOCUMENT_ID_ENDPOINT.format(index_name=index_name)}/{vespa_id}", proxies={'http':'', 'https':''}
     )
     res.raise_for_status()
 
@@ -703,7 +703,7 @@ class VespaIndex(DocumentIndex):
         zip_file = in_memory_zip_from_file_bytes(zip_dict)
 
         headers = {"Content-Type": "application/zip"}
-        response = requests.post(deploy_url, headers=headers, data=zip_file)
+        response = requests.post(deploy_url, headers=headers, data=zip_file, proxies={'http':'', 'https':''})
         if response.status_code != 200:
             raise RuntimeError(
                 f"Failed to prepare Vespa Danswer Index. Response: {response.text}"
@@ -739,7 +739,7 @@ class VespaIndex(DocumentIndex):
         # indexing / updates / deletes since we have to make a large volume of requests.
         with (
             concurrent.futures.ThreadPoolExecutor(max_workers=_NUM_THREADS) as executor,
-            httpx.Client(http2=True) as http_client,
+            httpx.Client(http2=True, proxies={}) as http_client,
         ):
             for update_batch in batch_generator(updates, batch_size):
                 future_to_document_id = {
@@ -813,7 +813,7 @@ class VespaIndex(DocumentIndex):
 
         # NOTE: using `httpx` here since `requests` doesn't support HTTP2. This is beneficial for
         # indexing / updates / deletes since we have to make a large volume of requests.
-        with httpx.Client(http2=True) as http_client:
+        with httpx.Client(http2=True, proxies={}) as http_client:
             index_names = [self.index_name]
             if self.secondary_index_name:
                 index_names.append(self.secondary_index_name)

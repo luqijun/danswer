@@ -16,23 +16,30 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* && \
     apt-get clean
 
+# 添加代理
+RUN export all_proxy="http://172.30.80.1:9910"
+
 # Install Python dependencies
 # Remove py which is pulled in by retry, py is not needed and is a CVE
 COPY ./requirements/default.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir --upgrade -r /tmp/requirements.txt && \
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir --upgrade -r /tmp/requirements.txt && \
     pip uninstall -y py && \
-    playwright install chromium && playwright install-deps chromium && \
+    # playwright install chromium && playwright install-deps chromium && \
     ln -s /usr/local/bin/supervisord /usr/bin/supervisord
+
+# 删除代理
+RUN unset all_proxy
 
 # Cleanup for CVEs and size reduction
 # https://github.com/tornadoweb/tornado/issues/3107
 # xserver-common and xvfb included by playwright installation but not needed after
 # perl-base is part of the base Python Debian image but not needed for Danswer functionality
 # perl-base could only be removed with --allow-remove-essential
-RUN apt-get remove -y --allow-remove-essential perl-base xserver-common xvfb cmake libldap-2.5-0 libldap-2.5-0 && \
-    apt-get autoremove -y && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm /usr/local/lib/python3.11/site-packages/tornado/test/test.key
+# RUN apt-get remove -y --allow-remove-essential perl-base xserver-common xvfb cmake libldap-2.5-0 libldap-2.5-0 && \
+#     apt-get autoremove -y && \
+#     rm -rf /var/lib/apt/lists/* && \
+#     rm /usr/local/lib/python3.11/site-packages/tornado/test/test.key
 
 # Set up application files
 WORKDIR /app
