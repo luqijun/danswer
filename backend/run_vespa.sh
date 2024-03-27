@@ -1,0 +1,1 @@
+docker run --detach --name vespa --hostname vespa-container -e "TZ=Asia/Shanghai" -e "PGTZ=Asia/Shanghai"   --publish 8081:8081 --publish 19071:19071   vespaengine/vespa:8.277.17
