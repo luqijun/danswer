@@ -1,3 +1,12 @@
+# 配置gpu可用 https://stackoverflow.com/questions/70761192/docker-compose-equivalent-of-docker-run-gpu-all-option
+# deploy:
+#     resources:
+#       reservations:
+#         devices:
+#           - driver: nvidia
+#             count: 1
+#             capabilities: [gpu]
+
 version: '3'
 services:
   api_server:
@@ -193,7 +202,7 @@ services:
       - WEB_DOMAIN=${WEB_DOMAIN:-}
   relational_db:
     image: postgres:15.2-alpine
-    restart: always
+    restart: "no"
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
@@ -204,7 +213,7 @@ services:
   # This container name cannot have an underscore in it due to Vespa expectations of the URL
   index:
     image: vespaengine/vespa:8.277.17
-    restart: always
+    restart: "no"
     ports:
       - "19071:19071"
       - "8081:8081"

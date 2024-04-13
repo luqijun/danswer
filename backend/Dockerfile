@@ -5,6 +5,9 @@ ARG DANSWER_VERSION=0.3-dev
 ENV DANSWER_VERSION=${DANSWER_VERSION}
 RUN echo "DANSWER_VERSION: ${DANSWER_VERSION}"
 
+RUN sed -i s:/deb.debian.org/debian:/mirrors.aliyun.com/debian:g /etc/apt/sources.list
+RUN cat /etc/apt/sources.list
+
 # Install system dependencies
 # cmake needed for psycopg (postgres)
 # libpq-dev needed for psycopg (postgres)

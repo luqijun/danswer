@@ -1,0 +1,1 @@
+docker compose -f docker-compose.custom.dev.yml -p danswer  up -d --no-deps --build relational_db index
