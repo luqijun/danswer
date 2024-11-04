@@ -1,18 +1,18 @@
 "use client";
 
 import React from "react";
-import { useState, useEffect } from "react";
 import useSWR from "swr";
 import { FetchError, errorHandlingFetcher } from "@/lib/fetcher";
 import { ErrorCallout } from "@/components/ErrorCallout";
 import { LoadingAnimation } from "@/components/Loading";
 import { usePopup } from "@/components/admin/connectors/Popup";
 import { ConnectorIndexingStatus } from "@/lib/types";
-import { getCurrentUser } from "@/lib/user";
-import { User, UserRole } from "@/lib/types";
-import { usePublicCredentials } from "@/lib/hooks";
-import { Title } from "@tremor/react";
-import { DriveJsonUploadSection, DriveOAuthSection } from "./Credential";
+import {
+  usePublicCredentials,
+  useConnectorCredentialIndexingStatus,
+} from "@/lib/hooks";
+import Title from "@/components/ui/title";
+import { DriveJsonUploadSection, DriveAuthSection } from "./Credential";
 import {
   Credential,
   GoogleDriveCredentialJson,
@@ -20,10 +20,9 @@ import {
 } from "@/lib/connectors/credentials";
 import { GoogleDriveConfig } from "@/lib/connectors/connectors";
 import { useUser } from "@/components/user/UserProvider";
-import { useConnectorCredentialIndexingStatus } from "@/lib/hooks";
 
 const GDriveMain = ({}: {}) => {
-  const { isLoadingUser, isAdmin } = useUser();
+  const { isLoadingUser, isAdmin, user } = useUser();
 
   const {
     data: appCredentialData,
@@ -109,6 +108,7 @@ const GDriveMain = ({}: {}) => {
     | undefined = credentialsData.find(
     (credential) => credential.credential_json?.google_drive_service_account_key
   );
+
   const googleDriveConnectorIndexingStatuses: ConnectorIndexingStatus<
     GoogleDriveConfig,
     GoogleDriveCredentialJson
@@ -135,7 +135,7 @@ const GDriveMain = ({}: {}) => {
           <Title className="mb-2 mt-6 ml-auto mr-auto">
             Step 2: Authenticate with Danswer
           </Title>
-          <DriveOAuthSection
+          <DriveAuthSection
             setPopup={setPopup}
             refreshCredentials={refreshCredentials}
             googleDrivePublicCredential={googleDrivePublicCredential}
@@ -145,6 +145,7 @@ const GDriveMain = ({}: {}) => {
             appCredentialData={appCredentialData}
             serviceAccountKeyData={serviceAccountKeyData}
             connectorExists={googleDriveConnectorIndexingStatuses.length > 0}
+            user={user}
           />
         </>
       )}

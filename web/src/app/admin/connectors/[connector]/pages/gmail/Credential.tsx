@@ -10,7 +10,7 @@ import { GMAIL_AUTH_IS_ADMIN_COOKIE_NAME } from "@/lib/constants";
 import Cookies from "js-cookie";
 import { TextFormField } from "@/components/admin/connectors/Field";
 import { Form, Formik } from "formik";
-import { Card } from "@tremor/react";
+import CardSection from "@/components/admin/CardSection";
 import {
   Credential,
   GmailCredentialJson,
@@ -271,6 +271,7 @@ export const GmailJsonUploadSection = ({
           className="text-link"
           target="_blank"
           href="https://docs.danswer.dev/connectors/gmail#authorization"
+          rel="noreferrer"
         >
           here
         </a>{" "}
@@ -352,7 +353,7 @@ export const GmailOAuthSection = ({
           the documents you want to index with the service account.
         </p>
 
-        <Card>
+        <CardSection>
           <Formik
             initialValues={{
               gmail_delegated_user: "",
@@ -414,7 +415,7 @@ export const GmailOAuthSection = ({
               </Form>
             )}
           </Formik>
-        </Card>
+        </CardSection>
       </div>
     );
   }

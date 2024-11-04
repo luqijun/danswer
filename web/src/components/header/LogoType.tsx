@@ -37,14 +37,19 @@ export default function LogoType({
 
   return (
     <div
-      className={`${hideOnMobile && "mobile:hidden"} z-[100] mb-auto shrink-0 flex items-center text-xl font-bold`}
+      className={`${
+        hideOnMobile && "mobile:hidden"
+      } z-[100] mb-auto shrink-0 flex items-center text-xl font-bold`}
     >
       {toggleSidebar && page == "chat" ? (
         <button
           onClick={() => toggleSidebar()}
-          className="pt-[2px] ml-4 desktop:invisible mb-auto"
+          className="pt-[2px] flex  gap-x-2 items-center ml-4 desktop:invisible mb-auto"
         >
           <FiSidebar size={20} />
+          {!showArrow && (
+            <Logo className="desktop:hidden -my-2" height={24} width={24} />
+          )}
         </button>
       ) : (
         <div className="mr-1 invisible mb-auto h-6 w-6">
@@ -52,7 +57,9 @@ export default function LogoType({
         </div>
       )}
       <div
-        className={`cursor-pointer ${showArrow ? "desktop:invisible" : "invisible"} break-words inline-block w-fit ml-2 text-text-700 text-xl`}
+        className={`cursor-pointer ${
+          showArrow ? "desktop:invisible" : "invisible"
+        } break-words inline-block w-fit ml-2 text-text-700 text-xl`}
       >
         <div className="max-w-[175px]">
           {enterpriseSettings && enterpriseSettings.application_name ? (
@@ -108,9 +115,9 @@ export default function LogoType({
             }}
           >
             {!toggled && !combinedSettings?.isMobile ? (
-              <RightToLineIcon />
+              <RightToLineIcon className="text-sidebar-toggle" />
             ) : (
-              <LeftToLineIcon />
+              <LeftToLineIcon className="text-sidebar-toggle" />
             )}
           </button>
         </Tooltip>

@@ -33,12 +33,15 @@ import { Tooltip } from "@/components/tooltip/Tooltip";
 import { Hoverable } from "@/components/Hoverable";
 import { SettingsContext } from "@/components/settings/SettingsProvider";
 import { ChatState } from "../types";
+import UnconfiguredProviderText from "@/components/chat_search/UnconfiguredProviderText";
+import { useAssistants } from "@/components/context/AssistantsContext";
 
 const MAX_INPUT_HEIGHT = 200;
 
 export function ChatInputBar({
   openModelSettings,
   showDocs,
+  showConfigureAPIKey,
   selectedDocuments,
   message,
   setMessage,
@@ -50,7 +53,6 @@ export function ChatInputBar({
 
   // assistants
   selectedAssistant,
-  assistantOptions,
   setSelectedAssistant,
   setAlternativeAssistant,
 
@@ -62,12 +64,12 @@ export function ChatInputBar({
   chatSessionId,
   inputPrompts,
 }: {
+  showConfigureAPIKey: () => void;
   openModelSettings: () => void;
   chatState: ChatState;
   stopGenerating: () => void;
   showDocs: () => void;
   selectedDocuments: DanswerDocument[];
-  assistantOptions: Persona[];
   setAlternativeAssistant: (alternativeAssistant: Persona | null) => void;
   setSelectedAssistant: (assistant: Persona) => void;
   inputPrompts: InputPrompt[];
@@ -82,7 +84,7 @@ export function ChatInputBar({
   setFiles: (files: FileDescriptor[]) => void;
   handleFileUpload: (files: File[]) => void;
   textAreaRef: React.RefObject<HTMLTextAreaElement>;
-  chatSessionId?: number;
+  chatSessionId?: string;
 }) {
   useEffect(() => {
     const textarea = textAreaRef.current;
@@ -93,7 +95,7 @@ export function ChatInputBar({
         MAX_INPUT_HEIGHT
       )}px`;
     }
-  }, [message]);
+  }, [message, textAreaRef]);
 
   const handlePaste = (event: React.ClipboardEvent) => {
     const items = event.clipboardData?.items;
@@ -111,7 +113,9 @@ export function ChatInputBar({
       }
     }
   };
+
   const settings = useContext(SettingsContext);
+  const { finalAssistants: assistantOptions } = useAssistants();
 
   const { llmProviders } = useChatContext();
   const [_, llmName] = getFinalLLM(llmProviders, selectedAssistant, null);
@@ -338,10 +342,10 @@ export function ChatInputBar({
                       updateInputPrompt(currentPrompt);
                     }}
                   >
-                    <p className="font-bold">{currentPrompt.prompt}</p>
-                    <p className="line-clamp-1">
+                    <p className="font-bold">{currentPrompt.prompt}:</p>
+                    <p className="text-left flex-grow mr-auto line-clamp-1">
                       {currentPrompt.id == selectedAssistant.id && "(default) "}
-                      {currentPrompt.content}
+                      {currentPrompt.content?.trim()}
                     </p>
                   </button>
                 ))}
@@ -364,6 +368,9 @@ export function ChatInputBar({
           <div>
             <SelectedFilterDisplay filterManager={filterManager} />
           </div>
+
+          <UnconfiguredProviderText showConfigureAPIKey={showConfigureAPIKey} />
+
           <div
             className="
               opacity-100
@@ -375,7 +382,8 @@ export function ChatInputBar({
               border
               border-[#E5E7EB]
               rounded-lg
-              bg-background-100
+              text-text-chatbar
+              bg-background-chatbar
               [&:has(textarea:focus)]::ring-1
               [&:has(textarea:focus)]::ring-black
             "
@@ -470,7 +478,8 @@ export function ChatInputBar({
                 resize-none
                 rounded-lg
                 border-0
-                bg-background-100
+                bg-background-chatbar
+                placeholder:text-text-chatbar-subtle
                 ${
                   textAreaRef.current &&
                   textAreaRef.current.scrollHeight > MAX_INPUT_HEIGHT
@@ -516,7 +525,6 @@ export function ChatInputBar({
                 removePadding
                 content={(close) => (
                   <AssistantsTab
-                    availableAssistants={assistantOptions}
                     llmProviders={llmProviders}
                     selectedAssistant={selectedAssistant}
                     onSelect={(assistant) => {
@@ -542,6 +550,7 @@ export function ChatInputBar({
                 tab
                 content={(close, ref) => (
                   <LlmTab
+                    currentAssistant={alternativeAssistant || selectedAssistant}
                     openModelSettings={openModelSettings}
                     currentLlm={
                       llmOverrideManager.llmOverride.modelName ||
@@ -626,7 +635,7 @@ export function ChatInputBar({
                 >
                   <SendIcon
                     size={28}
-                    className={`text-emphasis text-white p-1 rounded-full  ${chatState == "input" && message ? "bg-background-800" : "bg-background-400"} `}
+                    className={`text-emphasis text-white p-1 rounded-full  ${chatState == "input" && message ? "bg-submit-background" : "bg-disabled-submit-background"} `}
                   />
                 </button>
               )}
