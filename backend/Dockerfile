@@ -12,6 +12,16 @@ ARG DANSWER_VERSION=0.3-dev
 ENV DANSWER_VERSION=${DANSWER_VERSION}
 
 RUN echo "DANSWER_VERSION: ${DANSWER_VERSION}"
+
+# 检查 /etc/apt/sources.list 是否存在，如果不存在则创建一个新的
+RUN test -e /etc/apt/sources.list || echo "deb http://mirrors.aliyun.com/debian bookworm main" > /etc/apt/sources.list && \
+    echo "deb http://mirrors.aliyun.com/debian-security bookworm-security main" >> /etc/apt/sources.list && \
+    echo "deb http://mirrors.aliyun.com/debian bookworm-updates main" >> /etc/apt/sources.list
+RUN cat /etc/apt/sources.list
+
+# 设置 Python 的 pip 源为国内源
+RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+
 # Install system dependencies
 # cmake needed for psycopg (postgres)
 # libpq-dev needed for psycopg (postgres)
